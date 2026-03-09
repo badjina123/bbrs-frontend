@@ -1,3 +1,0 @@
-﻿[build]
-  command = "npx react-scripts build"
-  publish = "build"
