@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 
-const API = 'http://localhost:5000/api';
+const API = 'https://bbrs-backend.onrender.com/api';
 
 function Admin() {
   const [phase, setPhase] = useState('login');
@@ -54,7 +54,6 @@ function Admin() {
     }
   };
 
-  // ✅ Upload image depuis la machine
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -81,7 +80,6 @@ function Admin() {
     setUploadingImage(false);
   };
 
-  // ✅ Upload fichier (PDF, Word) depuis la machine
   const handleFichierUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -217,7 +215,7 @@ function Admin() {
         body: JSON.stringify(articleForm)
       });
       if (r.ok) {
-        showMsg(editingId ? 'Article modifie !' : articleForm.publie ? 'Article publié ! ✅' : 'Article sauvegardé en brouillon !');
+        showMsg(editingId ? 'Article modifie !' : articleForm.publie ? 'Article publié !' : 'Article sauvegardé en brouillon !');
         resetForm();
         chargerArticles();
       } else {
@@ -256,7 +254,7 @@ function Admin() {
     setArticleForm({ titre: a.titre, extrait: a.extrait || '', contenu: a.contenu || '', categorie: a.categorie, image: a.image || '', fichier: a.fichier || null, publie: a.publie });
     setEditingId(a.id);
     setShowForm(true);
-    setImagePreview(a.image ? 'http://localhost:5000' + a.image : '');
+    setImagePreview(a.image ? 'https://bbrs-backend.onrender.com' + a.image : '');
     setFichierInfo(a.fichier ? { nom: a.fichier.nom, mimetype: a.fichier.mimetype } : null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -279,7 +277,7 @@ function Admin() {
 
   const MsgBanner = () => msg ? (
     <div style={{ background: msg.type === 'error' ? 'rgba(255,50,50,0.15)' : 'rgba(0,170,0,0.15)', border: '1px solid ' + (msg.type === 'error' ? 'rgba(255,50,50,0.4)' : 'rgba(0,170,0,0.4)'), borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', color: msg.type === 'error' ? '#ff8080' : '#00ff88', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.9rem', fontWeight: 700 }}>
-      {msg.type === 'error' ? '❌ ' : '✅ '}{msg.texte}
+      {msg.type === 'error' ? 'Erreur : ' : 'OK : '}{msg.texte}
     </div>
   ) : null;
 
@@ -380,7 +378,6 @@ function Admin() {
         .upload-zone:hover { border-color: #00aa00; background: rgba(0,170,0,0.05); }
       `}</style>
 
-      {/* HEADER */}
       <div style={{ background: 'rgba(6,8,20,0.98)', borderBottom: '1px solid rgba(255,215,0,0.15)', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ color: '#ffd700', fontFamily: "'Orbitron', sans-serif", fontSize: '1.2rem', fontWeight: 900, letterSpacing: '3px' }}>DASHBOARD ADMIN</h1>
@@ -400,51 +397,44 @@ function Admin() {
         {showForm && (
           <div style={{ background: 'rgba(10,15,30,0.9)', border: '1px solid rgba(0,100,200,0.2)', borderRadius: '20px', padding: '32px', marginBottom: '32px' }}>
             <h2 style={{ color: '#ffd700', fontFamily: "'Orbitron', sans-serif", fontSize: '0.95rem', letterSpacing: '2px', marginBottom: '24px' }}>
-              {editingId ? 'MODIFIER L\'ARTICLE' : 'NOUVEL ARTICLE'}
+              {editingId ? "MODIFIER L'ARTICLE" : 'NOUVEL ARTICLE'}
             </h2>
             <form onSubmit={handleArticleSubmit} translate="no">
-              <label style={labelStyle}>Titre *</label>
+              <label style={labelStyle}>Titre</label>
               <input translate="no" style={inputStyle} type="text" value={articleForm.titre} onChange={e => setArticleForm({ ...articleForm, titre: e.target.value })} placeholder="Titre de l'article" required spellCheck="false" />
-
-              <label style={labelStyle}>Extrait (courte description)</label>
-              <input translate="no" style={inputStyle} type="text" value={articleForm.extrait} onChange={e => setArticleForm({ ...articleForm, extrait: e.target.value })} placeholder="Courte description visible sur la liste" spellCheck="false" />
-
+              <label style={labelStyle}>Extrait</label>
+              <input translate="no" style={inputStyle} type="text" value={articleForm.extrait} onChange={e => setArticleForm({ ...articleForm, extrait: e.target.value })} placeholder="Courte description" spellCheck="false" />
               <label style={labelStyle}>Categorie</label>
               <select style={{ ...inputStyle, cursor: 'pointer' }} value={articleForm.categorie} onChange={e => setArticleForm({ ...articleForm, categorie: e.target.value })}>
                 {['Réseau', 'Cybersécurité', 'Système', 'Linux', 'Windows', 'Cloud', 'Tutoriel', 'Actualité'].map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-
-              <label style={labelStyle}>Contenu de l'article</label>
-              <textarea translate="no" style={{ ...inputStyle, minHeight: '200px', resize: 'vertical' }} value={articleForm.contenu} onChange={e => setArticleForm({ ...articleForm, contenu: e.target.value })} placeholder="Écrivez votre article ici..." spellCheck="false" />
-
-              {/* ✅ UPLOAD IMAGE */}
+              <label style={labelStyle}>Contenu</label>
+              <textarea translate="no" style={{ ...inputStyle, minHeight: '200px', resize: 'vertical' }} value={articleForm.contenu} onChange={e => setArticleForm({ ...articleForm, contenu: e.target.value })} placeholder="Contenu de l'article..." spellCheck="false" />
               <label style={labelStyle}>Image de couverture</label>
               <div className="upload-zone" onClick={() => imageInputRef.current.click()}>
                 {imagePreview ? (
                   <div>
                     <img src={imagePreview} alt="preview" style={{ maxHeight: '150px', borderRadius: '8px', marginBottom: '8px' }} />
-                    <p style={{ color: '#00aa00', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.85rem' }}>✅ Image chargée — Cliquer pour changer</p>
+                    <p style={{ color: '#00aa00', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.85rem' }}>Image chargée — Cliquer pour changer</p>
                   </div>
                 ) : (
                   <div>
                     <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🖼️</div>
                     <p style={{ color: '#5a6a7a', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.9rem' }}>
-                      {uploadingImage ? 'Upload en cours...' : 'Cliquer pour choisir une image (JPG, PNG, GIF)'}
+                      {uploadingImage ? 'Upload en cours...' : 'Cliquer pour choisir une image'}
                     </p>
                   </div>
                 )}
               </div>
               <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
-
-              {/* ✅ UPLOAD FICHIER PDF/WORD */}
-              <label style={labelStyle}>Fichier joint (PDF, Word, etc.)</label>
+              <label style={labelStyle}>Fichier joint (PDF, Word)</label>
               <div className="upload-zone" onClick={() => fichierInputRef.current.click()}>
                 {fichierInfo ? (
                   <div>
                     <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{getFileIcon(fichierInfo.mimetype)}</div>
-                    <p style={{ color: '#00aa00', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.85rem' }}>✅ {fichierInfo.nom}</p>
+                    <p style={{ color: '#00aa00', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.85rem' }}>{fichierInfo.nom}</p>
                     <p style={{ color: '#5a6a7a', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.75rem' }}>Cliquer pour changer</p>
                   </div>
                 ) : (
@@ -453,22 +443,18 @@ function Admin() {
                     <p style={{ color: '#5a6a7a', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.9rem' }}>
                       {uploadingFichier ? 'Upload en cours...' : 'Cliquer pour joindre un fichier (PDF, Word, Excel)'}
                     </p>
-                    <p style={{ color: '#3a4a5a', fontFamily: "'Rajdhani', sans-serif", fontSize: '0.75rem', marginTop: '4px' }}>Max 10MB</p>
                   </div>
                 )}
               </div>
               <input ref={fichierInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" onChange={handleFichierUpload} style={{ display: 'none' }} />
-
-              {/* ✅ PUBLIER */}
               <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '20px', marginTop: '8px' }}>
                 <input type="checkbox" checked={articleForm.publie} onChange={e => setArticleForm({ ...articleForm, publie: e.target.checked })} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#00aa00' }} />
                 <span style={{ color: articleForm.publie ? '#00aa00' : '#7a8a9a', fontWeight: 700 }}>
-                  {articleForm.publie ? '✅ Publier immédiatement (visible sur le blog)' : '💾 Sauvegarder en brouillon'}
+                  {articleForm.publie ? 'Publier immediatement' : 'Sauvegarder en brouillon'}
                 </span>
               </label>
-
               <button type="submit" style={btnPrimary} disabled={loading || uploadingImage || uploadingFichier}>
-                {loading ? 'Sauvegarde...' : editingId ? '✏️ Modifier l\'article' : articleForm.publie ? '🚀 Publier l\'article' : '💾 Sauvegarder le brouillon'}
+                {loading ? 'Sauvegarde...' : editingId ? 'Modifier' : articleForm.publie ? 'Publier' : 'Sauvegarder'}
               </button>
             </form>
           </div>
@@ -486,7 +472,7 @@ function Admin() {
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
                     <span style={{ background: a.publie ? 'rgba(0,170,0,0.15)' : 'rgba(255,170,0,0.15)', color: a.publie ? '#00aa00' : '#ffaa00', border: '1px solid ' + (a.publie ? 'rgba(0,170,0,0.3)' : 'rgba(255,170,0,0.3)'), borderRadius: '20px', padding: '2px 10px', fontSize: '0.7rem', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700 }}>
-                      {a.publie ? '✅ Publié' : '💾 Brouillon'}
+                      {a.publie ? 'Publié' : 'Brouillon'}
                     </span>
                     <span style={{ color: '#4a5a6a', fontSize: '0.75rem', fontFamily: "'Rajdhani', sans-serif" }}>{a.categorie}</span>
                     {a.fichier && <span style={{ color: '#ffd700', fontSize: '0.75rem', fontFamily: "'Rajdhani', sans-serif" }}>{getFileIcon(a.fichier.mimetype)} Fichier joint</span>}
@@ -496,8 +482,8 @@ function Admin() {
                   <p style={{ color: '#3a4a5a', fontSize: '0.75rem', fontFamily: "'Rajdhani', sans-serif" }}>{new Date(a.dateCreation).toLocaleDateString('fr-FR')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button className="btn-edit" onClick={() => handleEdit(a)}>✏️ Modifier</button>
-                  <button className="btn-delete" onClick={() => handleDelete(a.id)}>🗑️ Supprimer</button>
+                  <button className="btn-edit" onClick={() => handleEdit(a)}>Modifier</button>
+                  <button className="btn-delete" onClick={() => handleDelete(a.id)}>Supprimer</button>
                 </div>
               </div>
             </div>
